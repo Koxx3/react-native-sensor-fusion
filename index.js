@@ -26,8 +26,9 @@ const createFilters = () => types
   );
 
 const SensorFusionProvider = ({ children, ...extraProps }) => {
-  const { sampleInterval } = extraProps;
-  const [ ahrs, setAhrs ] = useState(
+  // console.log("SensorFusionProvider / extraProps", extraProps)
+  const sampleInterval = extraProps.sampleInterval;
+  const [ahrs, setAhrs] = useState(
     new Ahrs(extraProps),
   );
   const [
@@ -36,11 +37,11 @@ const SensorFusionProvider = ({ children, ...extraProps }) => {
   ] = useState(
     createFilters(),
   );
-  const [ gyro ] = useState([ 0, 0, 0 ]);
-  const [ accl ] = useState([ 0, 0, 0 ]);
-  const [ comp ] = useState([ 0, 0, 0 ]);
-  const get = [ gyro, accl, comp ];
-  const [ value, setValue ] = useState(
+  const [gyro] = useState([0, 0, 0]);
+  const [accl] = useState([0, 0, 0]);
+  const [comp] = useState([0, 0, 0]);
+  const get = [gyro, accl, comp];
+  const [value, setValue] = useState(
     {
       ahrs,
       gyro,
@@ -63,13 +64,16 @@ const SensorFusionProvider = ({ children, ...extraProps }) => {
   useEffect(
     () => types
       .map(
-        type => Sensors.setUpdateIntervalForType(
-          type,
-          (1000 / sampleInterval),
-        ),
+        type => {
+          Sensors.setUpdateIntervalForType(
+            type,
+            (1000 / sampleInterval),
+          )
+          console.log("SensorFusionProvider / Sensors.setUpdateIntervalForType", type, (1000 / sampleInterval))
+        }
       )
       .reduce(() => undefined),
-    [ sampleInterval ],
+    [sampleInterval],
   );
   useEffect(
     () => {
@@ -78,7 +82,7 @@ const SensorFusionProvider = ({ children, ...extraProps }) => {
           (type, i) => Sensors[type]
             .subscribe(
               ({ x, y, z }) => {
-                [ x, y, z ]
+                [x, y, z]
                   .map(
                     (e, j) => get[i][j] = filters[i][j].filter(e),
                   );
@@ -132,13 +136,18 @@ SensorFusionProvider.defaultProps = {
   doInitialization: true,
 };
 
-export const toDegrees = a => (a + ((a < 0) ?  Math.PI * 2 : 0)) * (180 / Math.PI);
+export const toDegrees = a => (a + ((a < 0) ? Math.PI * 2 : 0)) * (180 / Math.PI);
 
 export const useSensorFusion = () => useContext(SensorFusionContext);
 
 export const useCompass = () => {
-  const { comp: [ x, y ] } = useSensorFusion();
-  return Math.atan2(y, x);
+  const { comp: [x, y] } = useSensorFusion();
+  return toDegrees(
+    Math.atan2(
+      y,
+      x,
+    ),
+  );
 };
 
 export default SensorFusionProvider;
