@@ -82,6 +82,9 @@ const SensorFusionProvider = ({ children, ...extraProps }) => {
           (type, i) => Sensors[type]
             .subscribe(
               ({ x, y, z }) => {
+                
+                z = z * (Platform.OS === 'ios' ? 9.8 : 1);
+
                 [x, y, z]
                   .map(
                     (e, j) => get[i][j] = filters[i][j].filter(e),
