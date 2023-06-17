@@ -82,8 +82,21 @@ const SensorFusionProvider = ({ children, ...extraProps }) => {
           (type, i) => Sensors[type]
             .subscribe(
               ({ x, y, z }) => {
-                
-                z = z * (Platform.OS === 'ios' ? 9.8 : 1);
+
+                if (type == "accelerometer") {
+                  if (Platform.OS === 'ios')
+                    z = z * -9.8;
+                  // console.log("SensorFusionProvider / Sensors[type]", type, x, y, z);
+                }
+                /*
+                else if (type == "gyroscope") {
+                  console.log("SensorFusionProvider / Sensors[type]", type, x, y, z);
+                } else if (type == "magnetometer") {
+                  // console.log("SensorFusionProvider / Sensors[type]", type, x, y, z);
+                }
+                */
+
+
 
                 [x, y, z]
                   .map(
