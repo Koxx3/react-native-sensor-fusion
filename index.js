@@ -9,25 +9,35 @@ const types = [
   'accelerometer',
   'magnetometer',
 ]
-  .map(
-    type => Sensors.SensorTypes[type],
-  );
+.map(
+  type => Sensors.SensorTypes[type],
+);
 
 const SensorFusionContext = React
-  .createContext(
-    null,
-  );
+.createContext(
+  null,
+);
 
 const createFilters = () => types
-  .map(
-    () => [...Array(3)].map(
-      () => new KalmanFilter(),
-    ),
-  );
+.map(
+  () => [...Array(3)].map(
+    () => new KalmanFilter(),
+  ),
+);
 
-const SensorFusionProvider = ({ children, ...extraProps }) => {
+
+const SensorFusionProvider = ({
+  children,
+  sampleInterval = 60,
+  algorithm = 'Madgwick',
+  beta = 0.4,
+  kp = 0.5,
+  ki = 0,
+  doInitialization = true,
+  ...extraProps
+}) => {
   // console.log("SensorFusionProvider / extraProps", extraProps)
-  const sampleInterval = extraProps.sampleInterval;
+
   const [ahrs, setAhrs] = useState(
     new Ahrs(extraProps),
   );
@@ -141,15 +151,6 @@ SensorFusionProvider.propTypes = {
   kp: PropTypes.number,
   ki: PropTypes.number,
   doInitialization: PropTypes.bool,
-};
-
-SensorFusionProvider.defaultProps = {
-  sampleInterval: 60,
-  algorithm: 'Madgwick',
-  beta: 0.4,
-  kp: 0.5,
-  ki: 0,
-  doInitialization: true,
 };
 
 export const toDegrees = a => (a + ((a < 0) ? Math.PI * 2 : 0)) * (180 / Math.PI);
